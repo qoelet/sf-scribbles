@@ -374,4 +374,36 @@ Proof.
     reflexivity.
   Qed.
 
+(* Exercise *)
+Theorem app_assoc4: forall l m n o : natlist,
+  l ++ (m ++ (n ++ o)) = ((l ++ m) ++ n) ++ o.
+
+Proof.
+  intros.
+  induction l as [| k l' IHl' ].
+  - simpl. rewrite <- app_assoc. reflexivity.
+  - simpl.
+    rewrite -> app_assoc.
+    rewrite -> app_assoc.
+    reflexivity.
+  Qed.
+
+(* Exercise *) (* This was crazy! *)
+Lemma nonzeros_app: forall m n : natlist,
+  nonzeros (m ++ n) = (nonzeros m) ++ (nonzeros n).
+
+Proof.
+  intros m n.
+  induction m as [| k m' IHm' ].
+  - simpl. reflexivity.
+  - simpl. rewrite -> IHm'. induction n as [| l n' IHn' ].
+    + simpl.
+      rewrite -> app_nil_r.
+      rewrite -> app_nil_r.
+      reflexivity.
+    + simpl. destruct k.
+      * reflexivity.
+      * simpl. reflexivity.
+  Qed.
+
 End NatList.
