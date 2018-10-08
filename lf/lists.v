@@ -63,7 +63,7 @@ Proof.
   Qed.
 
 (* List of numbers *)
-Inductive natlist : Type := 
+Inductive natlist : Type :=
   | nil : natlist
   | cons : nat -> natlist -> natlist.
 
@@ -91,12 +91,12 @@ Fixpoint length (l : natlist) : nat :=
   end.
 
 Fixpoint app (m n : natlist) : natlist :=
-  match m with 
+  match m with
     | nil => n
     | h :: t => h :: (app t n)
   end.
 
-Notation "x ++ y" := 
+Notation "x ++ y" :=
   (app x y)
   (right associativity, at level 60).
 
@@ -121,7 +121,7 @@ Definition tl (l : natlist) : natlist :=
 Fixpoint nonzeros (l : natlist) : natlist :=
   match l with
     | nil => nil
-    | h :: t => 
+    | h :: t =>
       match h with
         | 0 => nonzeros t
         | s => s :: (nonzeros t)
@@ -214,7 +214,7 @@ Definition bag := natlist.
 Fixpoint count (v : nat) (s : bag) : nat :=
   match s with
     | nil => 0
-    | h :: t => 
+    | h :: t =>
       match (beq_nat v h) with
         | true => 1 + count v t
         | false => count v t
@@ -239,7 +239,7 @@ Example test_sum1: count 1 (sum [1;2;3] [1;4;1]) = 3.
 Proof.
   reflexivity. Qed.
 
-Definition add (v : nat) (s : bag) : bag := 
+Definition add (v : nat) (s : bag) : bag :=
   match s with
     | nil => v :: nil
     | h :: t => v :: h :: t
@@ -292,5 +292,86 @@ Example test_rev1: rev [1;2;3] = [3;2;1].
 Proof. reflexivity. Qed.
 Example test_rev2: rev nil = nil.
 Proof. reflexivity. Qed.
+
+(* Lemma for proving the next theorem *)
+Theorem app_length: forall m n : natlist,
+  length (m ++ n) = (length m) + (length n).
+
+Proof.
+  intros m n.
+  induction m as [| k m IHm1' ].
+  - reflexivity.
+  - simpl. rewrite <- IHm1'. reflexivity.
+  Qed.
+
+Theorem rev_length: forall l : natlist,
+  length (rev l) = length l.
+
+Proof.
+  intros l.
+  induction l as [| n l' IHl' ].
+  - reflexivity.
+  - simpl.
+    rewrite -> app_length, plus_comm.
+    simpl. rewrite -> IHl'.
+    reflexivity.
+  Qed.
+
+(* Exercise *)
+Theorem app_nil_r: forall l : natlist,
+  l ++ [] = l.
+
+Proof.
+  intros l.
+  induction l as [| n l' IHl' ].
+  - simpl. reflexivity.
+  - simpl. rewrite -> IHl'. reflexivity.
+  Qed.
+
+(* Exercise *)
+Lemma rev_nil_r: forall l : natlist,
+  rev l ++ [] = rev l.
+
+Proof.
+  intros l.
+  induction l as [| n l' IHl' ].
+  - simpl. reflexivity.
+  - simpl. rewrite <- IHl', app_assoc. simpl. reflexivity.
+  Qed.
+
+Theorem rev_app_distr: forall m n : natlist,
+  rev (m ++ n) = rev n ++ rev m.
+
+Proof.
+  intros m n.
+  induction m as [| k m' IHm' ].
+  - simpl. rewrite -> rev_nil_r. reflexivity.
+  - simpl. rewrite -> IHm', app_assoc. reflexivity.
+  Qed.
+
+(* Exercise *)
+Lemma foo: forall (l : natlist) (v : nat),
+  rev l ++ [v] = rev (v :: l).
+
+Proof.
+  intros l v.
+  induction l as [| n l' IHl' ].
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+  Qed.
+
+Theorem rev_involutive: forall l : natlist,
+  rev (rev l) = l.
+
+Proof.
+  intros l.
+  induction l as [| n l' IHl' ].
+  - simpl. reflexivity.
+  - simpl.
+    rewrite -> foo.
+    simpl. rewrite -> rev_app_distr.
+    simpl. rewrite -> IHl'.
+    reflexivity.
+  Qed.
 
 End NatList.
