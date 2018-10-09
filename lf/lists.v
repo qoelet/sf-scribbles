@@ -406,4 +406,126 @@ Proof.
       * simpl. reflexivity.
   Qed.
 
+(* Exercise *)
+Theorem rev_injective: forall m n : natlist,
+  rev m = rev n -> m = n.
+
+Proof.
+  intros.
+  rewrite <- rev_involutive. 
+  rewrite <- H.
+  rewrite -> rev_involutive.
+  reflexivity.
+  Qed.
+
+(* Demonstrating options *)
+Inductive natoption : Type :=
+  | Some : nat -> natoption
+  | None : natoption.
+
+Fixpoint nth_error (l : natlist) (n : nat) : natoption :=
+  match l with
+    | nil => None
+    | a :: l' =>
+      match beq_nat n O with
+        | true => Some a
+        | false => nth_error l' (pred n)
+      end
+  end.
+
+Example test_nth_error1 : nth_error [4;5;6;7] 0 = Some 4.
+
+Proof.
+  reflexivity. Qed.
+
+Example test_nth_error2 : nth_error [4;5;6;7] 3 = Some 7.
+
+Proof.
+  reflexivity. Qed.
+
+Example test_nth_error3 : nth_error [4;5;6;7] 9 = None.
+
+Proof.
+  reflexivity. Qed.
+
+Definition option_elim (d : nat) (o : natoption) : nat :=
+  match o with
+  | Some n' => n'
+  | None => d
+  end.
+
+(* Exercise *)
+Definition hd_error (l : natlist) : natoption :=
+  match l with
+    | nil => None
+    | a :: l' => Some a
+  end.
+
+Example test_hd_error_1: hd_error [] = None.
+
+Proof.
+  reflexivity. Qed.
+
+Example test_hd_error2 : hd_error [1] = Some 1.
+
+Proof.
+  reflexivity. Qed.
+
+Example test_hd_error3 : hd_error [5;6] = Some 5.
+
+Proof.
+  reflexivity. Qed.
+
+(* Exercise *)
+Theorem option_elim_hd : forall (l : natlist) (default : nat),
+  hd default l = option_elim default (hd_error l).
+
+Proof.
+  intros.
+  induction l as [| k l' IHl'].
+  - simpl. reflexivity.
+  - simpl. reflexivity.
+  Qed.
+
+(* Demonstrating partial maps *)
+Inductive id : Type :=
+  | Id : nat -> id.
+
+Definition beq_id (x y : id) :=
+  match x, y with
+  | Id f, Id g => beq_nat f g
+  end.
+
+(* Exercise *)
+Lemma beq_nat_true: forall (x y : nat),
+  x = y -> beq_nat x y = true.
+
+Proof.
+  intros.
+  subst.
+  induction y as [| z y' IHy' ].
+  - simpl. reflexivity.
+  - simpl. rewrite -> y'. reflexivity.
+  Qed.
+
+Lemma beq_nat_refl: forall (x : nat), beq_nat x x = true.
+
+Proof.
+  intros.
+  destruct x.
+  - simpl. reflexivity.
+  - simpl. rewrite -> beq_nat_true.
+    + reflexivity.
+    + reflexivity.
+  Qed.
+
+Theorem beq_id_refl: forall x, true = beq_id x x.
+
+Proof.
+  destruct x.
+  simpl. induction n as [| k n' ].
+  - simpl. reflexivity.
+  - simpl. rewrite beq_nat_refl. reflexivity.
+  Qed.
+
 End NatList.
