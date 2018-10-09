@@ -412,7 +412,7 @@ Theorem rev_injective: forall m n : natlist,
 
 Proof.
   intros.
-  rewrite <- rev_involutive. 
+  rewrite <- rev_involutive.
   rewrite <- H.
   rewrite -> rev_involutive.
   reflexivity.
@@ -503,7 +503,7 @@ Lemma beq_nat_true: forall (x y : nat),
 Proof.
   intros.
   subst.
-  induction y as [| z y' IHy' ].
+  induction y as [| z y' ].
   - simpl. reflexivity.
   - simpl. rewrite -> y'. reflexivity.
   Qed.
@@ -529,3 +529,48 @@ Proof.
   Qed.
 
 End NatList.
+
+Module PartialMap.
+Export NatList.
+
+Inductive partial_map : Type :=
+  | empty : partial_map
+  | record : id -> nat -> partial_map -> partial_map.
+
+Definition update
+  (d : partial_map) (x : id) (value : nat)
+  : partial_map :=
+  record x value d.
+
+Fixpoint find (x : id) (d : partial_map) : natoption :=
+  match d with
+    | empty => None
+    | record y v d' =>
+      if beq_id x y
+        then Some v
+        else find x d'
+  end.
+
+(* Exercise *)
+Theorem update_eq:
+  forall (d : partial_map) (x : id) (v : nat),
+  find x (update d x v) = Some v.
+
+Proof.
+  intros.
+  simpl. induction d as [| c d' IHd' ].
+  - rewrite <- beq_id_refl. reflexivity.
+  - rewrite <- beq_id_refl. reflexivity.
+  Qed.
+
+(* Exercise *)
+Theorem update_neq:
+  forall (d : partial_map) (x y : id) (o : nat),
+  beq_id x y = false -> find x (update d y o) = find x d.
+
+Proof.
+  intros.
+  simpl. rewrite H. reflexivity.
+  Qed.
+
+End PartialMap.
