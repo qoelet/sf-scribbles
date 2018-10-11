@@ -303,3 +303,33 @@ Proof.
     + simpl. discriminate.
     + simpl. reflexivity.
   Qed.
+
+Fixpoint geb (n m : nat) : bool :=
+  match n with
+    | O => false
+    | S n' =>
+      match m with
+        | O => true
+        | S m' => geb n' m'
+      end
+  end.
+
+Example test_geb2: (geb 4 2) = true.
+Proof. simpl. reflexivity. Qed.
+Example test_geb3: (geb 2 4) = false.
+Proof. simpl. reflexivity. Qed.
+
+Definition bgt_nat (n m : nat) : bool :=
+  match beq_nat n m with
+    | true => false
+    | false => geb n m
+  end.
+
+Example test_bgt_nat_1: bgt_nat 2 3 = false.
+Proof. 
+  reflexivity. Qed.
+
+Example test_bgt_nat_2: bgt_nat 19 3 = true.
+Proof. 
+  simpl.
+  reflexivity. Qed.
