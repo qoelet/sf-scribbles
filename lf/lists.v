@@ -75,8 +75,8 @@ Notation "x :: l" :=
   (at level 60, right associativity).
 
 Notation "[ ]" := nil.
-Notation "[ x ; .. ; y ]" := (cons x .. (cons y nil) ..).
-
+Notation "[ x ; .. ; y ]" :=
+  (cons x .. (cons y nil) ..).
 (* Some functions for working with lists *)
 Fixpoint repeat (n count : nat) : natlist :=
   match count with
