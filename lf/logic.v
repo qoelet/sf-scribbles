@@ -4,6 +4,8 @@ Require Import numbers.
 Require Import induction.
 Require Import poly.
 Require Import tactics.
+Require Import Coq.Lists.List.
+Open Scope list_scope.
 
 (* Propositions are first class objects in Coq *)
 Theorem plus_2_2_is_4:
@@ -307,3 +309,126 @@ Proof.
   apply HN in H.
   apply H.
   Qed.
+
+Theorem not_true_is_false:
+  forall b : bool,
+  b <> true -> b = false.
+
+Proof.
+  intros [] H.
+  - (* b = true *)
+    unfold not in H.
+    apply ex_falso_quodlibet.
+    apply H. reflexivity.
+  - (* b = false *)
+    reflexivity.
+  Qed.
+
+(* Coq has a built-in tactic `exfalso` for applying reasoning with `ex_falso_quodlibet` *)
+Theorem not_true_is_false':
+  forall b : bool,
+  b <> true -> b = false.
+
+Proof.
+  intros [] H.
+  - unfold not in H.
+    exfalso.
+    apply H. reflexivity.
+  - reflexivity.
+  Qed.
+
+(* Truth *)
+(* `I` is a predefined constant `I : True` *)
+Lemma True_is_true : True.
+
+Proof.
+  apply I. Qed.
+
+(* Logical equivalence *)
+Module MyIff.
+
+Definition iff (P Q : Prop) := 
+  (P -> Q) /\ (Q -> P).
+
+Notation "P <-> Q" := (iff P Q) (at level 95, no associativity) : type_scope.
+
+End MyIff.
+
+Theorem iff_sym:
+  forall P Q : Prop,
+  (P <-> Q) -> (Q <-> P).
+
+Proof.
+  intros P Q [HAB HBA].
+  split.
+  - apply HBA.
+  - apply HAB.
+  Qed.
+
+Lemma not_true_iff_false:
+  forall b, b <> true <-> b = false.
+
+Proof.
+  intros b.
+  split.
+  - unfold not. apply not_true_is_false.
+  - intros H. rewrite H. intros H'. inversion H'.
+  Qed.
+
+(* Exercise *)
+Theorem or_distributes_over_and:
+  forall P Q R : Prop,
+  P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
+
+Proof.
+  Admitted.
+
+(* Existential quantification *)
+Lemma four_is_even:
+  exists n : nat,
+  4 = n + n.
+
+Proof.
+  exists 2. reflexivity.
+  Qed.
+
+Theorem exists_example_2:
+  forall n,
+  (exists m, n = 4 + m) ->
+  (exists o, n = 2 + o).
+
+Proof.
+  intros n [m Hm].
+  exists (2 + m).
+  apply Hm.
+  Qed.
+
+(* Exercise *)
+Theorem dist_not_exists:
+  forall (X : Type) (P : X -> Prop),
+  (forall x, P x) -> ~ (exists x, ~ P x).
+
+Proof.
+  intros.
+  unfold not. intros H2. destruct H2 as [x E].
+  apply E. apply H.
+  Qed.
+
+Fixpoint In
+  {A : Type} (x : A) (l : list A) : Prop :=
+  match l with
+    | nil => False
+    | x' :: l' => x' = x \/ In x l'
+  end.
+
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" :=
+  (cons x .. (cons y nil) ..).
+
+Example In_example_1:
+  In 4 [ 1; 2; 3; 4; 5 ].
+
+Proof.
+  simpl. right. right. right. left. reflexivity.
+  Qed.
+
